@@ -62,45 +62,12 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
         for i in range(amount): 
             await user.send(message) 
 
-@bot.command(name = 'nhen', help = 'You know what that is')
-async def nhen(ctx, *, message):
-    url = f"https://nhentai.net/api/gallery/{message}"
-    req = requests.get(url,proxies=urllib.request.getproxies()).json()
-    pages = req["images"]["pages"]
-    title = req["title"]["english"]
-    links = []
-    ext = {"j":"jpg","p":"png","g":"gif"}
- 
-    for i , x in enumerate(pages):
-        file_id = req["media_id"]
-        sus = x["t"]
-        if sus == "g":
-            print("Gif type isn't support right now")
-            break
-        else:
-            file = f"{i+1}.{ext[sus]}"
-            link = f"https://i.nhentai.net/galleries/{file_id}/{file}"
-            links.append(link)
- 
-    folder_name = f"{title}"
-    os.makedirs(f"{folder_name}", exist_ok=True)
-    print("Downloading....")
- 
-    for link in links:
-        r = requests.get(link,proxies=urllib.request.getproxies())
-        file_name = re.findall('([^\/]+$)', link)
-        hmm = file_name[0].split('.')
-        file_name = f"{hmm[0].zfill(4)}.{hmm[1]}"
-        with open(os.path.join(folder_name, file_name), "wb") as f:
-            f.write(r.content)
- 
-    with open(os.path.join(folder_name, file),"wb") as f:
-        f.write(r.content)
+    
  
  
 @bot.command(name = 'pfp', help = "Downloads the target's pfp")
 async def pfp(ctx, user: discord.User):
-  pfp = user.avatar
+  pfp = user.avatar_url
   user_id = user.id
   await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your avatar {}".format(user_id, pfp))
   

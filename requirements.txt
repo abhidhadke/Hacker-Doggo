@@ -5,7 +5,6 @@ certifi==2021.10.8
 cffi==1.15.0
 chardet==4.0.0
 charset-normalizer==2.0.12
-discord.py==1.7.3
 idna==3.3
 multidict==6.0.2
 py-cord==1.7.3

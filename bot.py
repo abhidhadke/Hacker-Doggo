@@ -70,7 +70,9 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
   user_id = user.id
-  await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your avatar {}".format(user_id, pfp))
+  embed_link = discord.Embed()
+  embed_link.description = f"Hello Hooman!! a.k.a @{user_id}, here is your [avatar]('{pfp}&quality=loseless')"
+  await ctx.send(embed=embed_link)
   
   
 @bot.command(name='ban',help='bans the user')

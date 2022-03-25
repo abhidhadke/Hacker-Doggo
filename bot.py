@@ -1,5 +1,6 @@
 import discord
 import nacl
+
 import os
 from dotenv import load_dotenv
 from discord.ext import commands,tasks
@@ -103,7 +104,7 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'audioformat': 'mp3',
-    'outtmpl': '%(extractor)s-%(title)s.mp3',
+    'outtmpl': '%(title)s.mp3',
     'preferredquality': '256',
     'restrictfilenames': True,
     'noplaylist': True,

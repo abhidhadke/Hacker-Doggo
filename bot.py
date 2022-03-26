@@ -69,7 +69,7 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
 @bot.command(name = 'pfp', help = "Downloads the target's pfp")
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
-  embed = discord.Embed(title="avatar",url="pfp")
+  embed = discord.Embed(title="avatar",url=pfp)
   await ctx.send(f"Hello Hooman!! a.k.a @{user}, here is your",embed=embed)
   
   

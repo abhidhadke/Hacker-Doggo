@@ -66,7 +66,7 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
     
  
  
-@bot.command(name = 'pfp', help = "Downloads the target's pfp")
+@bot.command(name = 'pfp', help = "Downloads the target's avatar")
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
   embed = discord.Embed(title="avatar",url=pfp)

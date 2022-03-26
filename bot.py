@@ -1,6 +1,5 @@
 import discord
 import nacl
-
 import os
 from dotenv import load_dotenv
 from discord.ext import commands,tasks
@@ -22,6 +21,7 @@ bot = commands.Bot(command_prefix='$')
 async def mention_bot(message):
     if bot.user.mentioned_in(message):
       await message.channel.send("**Bhaau Bhaau**")
+
 
 
 @bot.event
@@ -46,7 +46,7 @@ async def spam(ctx, amount:int, *, message):
       if ctx.message.author.id == 756747629739638945:
         await ctx.send("**Shut up nigga**")
       elif amount > 50:
-        await ctx.send(f"Shut up...delete discord and get a life!!")
+        await ctx.send("Shut up...delete discord and get a life!!")
       else:
         for i in range(amount): 
             await ctx.send(message)
@@ -69,8 +69,10 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
 @bot.command(name = 'pfp', help = "Downloads the target's avatar")
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
-  embed = discord.Embed(title="avatar",url=pfp)
-  await ctx.send(f"Hello Hooman!! a.k.a @{user}, here is your",embed=embed)
+  user_id = user.id
+  embed = discord.Embed(title="avatar")
+  embed.set_image(url = pfp)
+  await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your".format(user_id),embed=embed)
   
   
 @bot.command(name='ban',help='bans the user')
@@ -84,7 +86,7 @@ async def ban(ctx,user: discord.User = None, *, reason = None):
     message = f"**You have been banned from {ctx.guild.name} for following reason: {reason}**"
     await user.send(message)
     await ctx.guild.ban(user, reason=reason)
-    await ctx.send(f"**@{user} has been banned for the following reason: {reason}**")
+    await ctx.send(f"**<@{user}> has been banned for the following reason: {reason}**")
   
     
 @bot.command(name = 'timeout', help = 'The user is timed out from the server')

@@ -1,3 +1,5 @@
+from asyncio.windows_events import NULL
+from fileinput import filename
 import discord
 import nacl
 import os
@@ -107,7 +109,7 @@ ytdl_format_options = {
     'format': 'bestaudio/best',
     'audioformat': 'mp3',
     'outtmpl': '%(title)s.mp3',
-    'preferredquality': '256',
+    'preferredquality': '320',
     'restrictfilenames': True,
     'noplaylist': True,
     'nocheckcertificate': True,
@@ -143,7 +145,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         if 'entries' in data:
             data = data['entries'][0]
-
+        global filename
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
@@ -209,9 +211,12 @@ async def disconnect(ctx):
     voice_client = ctx.message.guild.voice_client
     await ctx.send('**Disconnected...Sayonara!!**')
     queue.clear()
-    
-  
+    server = ctx.message.guild
+    voice_channel = server.voice_client
     await voice_client.disconnect()
+    
+    os.remove(filename)
+  
     
     
 

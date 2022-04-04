@@ -72,9 +72,9 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
   user_id = user.id
-  embed = discord.Embed(title="avatar")
+  embed = discord.Embed(title="⠀")
   embed.set_image(url = pfp)
-  await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your".format(user_id),embed=embed)
+  await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your avatar".format(user_id),embed=embed)
   
   
 @bot.command(name='ban',help='bans the user')

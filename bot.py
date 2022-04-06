@@ -1,16 +1,12 @@
-from asyncio.windows_events import NULL
-from fileinput import filename
 import discord
-import nacl
 import os
 from dotenv import load_dotenv
 from discord.ext import commands,tasks
 import asyncio
 import youtube_dl
-import re
-import requests
 import datetime
-import urllib
+import nacl
+
 
 
 client = discord.Client()

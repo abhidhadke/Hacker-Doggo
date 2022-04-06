@@ -12,7 +12,7 @@ idna==3.3
 imageio-ffmpeg==0.4.5
 multidict==6.0.2
 numpy==1.22.3
-py-cord==1.7.3
+py-cord
 pycparser==2.21
 PyNaCl==1.4.0
 python-dotenv==0.19.2
@@ -22,4 +22,4 @@ typing_extensions==4.1.1
 urllib3==1.26.9
 yarl==1.7.2
 youtube-dl
-discord
+discord==1.7.2

@@ -215,7 +215,7 @@ async def disconnect(ctx):
     voice_channel = server.voice_client
     await voice_client.disconnect()
     
-    os.remove(filename)
+  
   
     
     

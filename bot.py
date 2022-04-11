@@ -6,7 +6,7 @@ import asyncio
 import youtube_dl
 import datetime
 import nacl
-import shutil
+
 
 
 
@@ -105,7 +105,7 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 ytdl_format_options = {
     'format': 'bestaudio/best',
     'audioformat': 'mp3',
-    'outtmpl': '/music_files/%(title)s.mp3',
+    'outtmpl': '%(title)s.mp3',
     'preferredquality': '320',
     'restrictfilenames': True,
     'noplaylist': True,
@@ -212,9 +212,7 @@ async def disconnect(ctx):
     voice_channel = server.voice_client
     voice_channel.stop()
     await voice_client.disconnect()
-    os.unlink("./music_files")
-    shutil.rmtree("./music_files")
-
+    
     
   
   

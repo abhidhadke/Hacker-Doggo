@@ -88,7 +88,7 @@ async def ban(ctx,user: discord.User = None, *, reason = None):
     await ctx.send(f"**<@{user}> has been banned for the following reason: {reason}**")
   
     
-@bot.command(name = 'timeout', help = 'The user is timed out from the server')
+@bot.command(name = 'timeout', help = 'The user is timed out from the server/(not working)')
 @commands.has_any_role('mod','Anudi Mod')
 async def timeout(ctx, user: discord.User = None, time:int = None):
   if (user == None or user == ctx.message.author):

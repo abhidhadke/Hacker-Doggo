@@ -33,14 +33,14 @@ async def on_ready():
 
 
 
-@bot.command(name='sleep', help = 'Shutsdown the bot')
+@bot.command(name='sleep', help = 'DO NOT USE!! experimental only!!')
 async def shutdown(ctx):
   userid = '543447097945489418'
   await ctx.send("**Going to sleep coz my powers are being misused..tell <@{}> to wake me up.**".format(userid))
   exit()
 
 
-@bot.command(name='spam', help='Spams the input message for x number of times')
+@bot.command(name='spam', help='$spam {amount} {message}')
 async def spam(ctx, amount:int, *, message):  
       if ctx.message.author.id == 756747629739638945:
         await ctx.send("**Shut up nigga**")
@@ -51,10 +51,10 @@ async def spam(ctx, amount:int, *, message):
             await ctx.send(message)
 
 
-@bot.command(name = 'DM', help = 'Send the target user dm')
+@bot.command(name = 'DM', help = '$DM {user} {amount} {message}')
 async def DM(ctx, user: discord.User, amount:int, *, message):
   if ctx.message.author.id == 756747629739638945:
-        await ctx.send("**Shut up ni**a**")
+        await ctx.send("**Shut up nigga**")
   elif amount > 20:
         await ctx.send('**Please....get a life**')
   else:
@@ -65,7 +65,7 @@ async def DM(ctx, user: discord.User, amount:int, *, message):
     
  
  
-@bot.command(name = 'pfp', help = "Downloads the target's avatar")
+@bot.command(name = 'pfp', help = "shows the user's avatar")
 async def pfp(ctx, user: discord.User):
   pfp = user.avatar_url
   user_id = user.id

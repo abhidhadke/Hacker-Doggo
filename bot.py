@@ -11,7 +11,6 @@ import re
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
-
 # Intents setup
 intents = discord.Intents.default()
 intents.message_content = True
@@ -86,7 +85,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     FFMPEG_OPTIONS = {
         'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-        'options': '-vn'
+        'options': '-vn',
     }
 
     def __init__(self, source, *, data):

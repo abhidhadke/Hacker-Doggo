@@ -1,4 +1,5 @@
 discord.py
+pynacl
 python-dotenv
 yt-dlp
 ffmpeg

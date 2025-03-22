@@ -1,266 +1,215 @@
 import discord
 import os
 from dotenv import load_dotenv
-from discord.ext import commands,tasks
+from discord.ext import commands
 import asyncio
-import youtube_dl
-import datetime
-import nacl
+import yt_dlp
+import re
 
 
+# Load environment variables
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 
 
-client = discord.Client()
+# Intents setup
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
 
-
-
-bot = commands.Bot(command_prefix='$')
-
-@bot.listen('on_message')
-async def mention_bot(message):
-    if bot.user.mentioned_in(message):
-      await message.channel.send("**Bhaau Bhaau**")
-
-
+bot = commands.Bot(command_prefix='$', intents=intents)
 
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Game(name="with Hoomans"))
     print("Bot is ready!")
 
-      
+@bot.event
+async def on_message(message):
+    if bot.user.mentioned_in(message):
+        await message.channel.send("**Bhaau Bhaau**")
+    await bot.process_commands(message)
 
+@bot.command(name="sleep", help="Makes the bot sleep for 1 hour")
+async def sleep(ctx):
+    await ctx.send("Going to sleep for **1 hour** because my powers are being misused!!")
+    
+    # Sleep for 1 hour (3600 seconds)
+    await asyncio.sleep(3600)
 
-
-
-@bot.command(name='sleep', help = 'DO NOT USE!! experimental only!!')
-async def shutdown(ctx):
-  userid = '543447097945489418'
-  await ctx.send("**Going to sleep coz my powers are being misused..tell <@{}> to wake me up.**".format(userid))
-  exit()
-
+    await ctx.send("I am awake now, Good Morning yall!!!")
 
 @bot.command(name='spam', help='$spam {amount} {message}')
-async def spam(ctx, amount:int, *, message):  
-      if ctx.message.author.id == 756747629739638945:
-        await ctx.send("**Shut up nigga**")
-      elif amount > 50:
+async def spam(ctx, amount: int, *, message):
+    if amount > 50:
         await ctx.send("Shut up...delete discord and get a life!!")
-      else:
-        for i in range(amount): 
+    else:
+        for _ in range(amount):
             await ctx.send(message)
 
-
-@bot.command(name = 'DM', help = '$DM {user} {amount} {message}')
-async def DM(ctx, user: discord.User, amount:int, *, message):
-  if ctx.message.author.id == 756747629739638945:
-        await ctx.send("**Shut up nigga**")
-  elif amount > 20:
+@bot.command(name='DM', help='$DM {user} {amount} {message}')
+async def dm(ctx, user: discord.User, amount: int, *, message):
+    if amount > 20:
         await ctx.send('**Please....get a life**')
-  else:
+    else:
         await ctx.send('**Successfully sent!**')
-        for i in range(amount): 
-            await user.send(message) 
+        for _ in range(amount):
+            await user.send(message)
 
-    
- 
- 
-@bot.command(name = 'pfp', help = "shows the user's avatar")
-async def pfp(ctx, user: discord.User):
-  pfp = user.avatar_url
-  user_id = user.id
-  embed = discord.Embed(title="⠀")
-  embed.set_image(url = pfp)
-  await ctx.send("Hello Hooman!! a.k.a <@{}>, here is your avatar".format(user_id),embed=embed)
-  
-  
-@bot.command(name='ban',help='bans the user')
-@commands.has_any_role('mod','Anudi Mod')
-async def ban(ctx,user: discord.User = None, *, reason = None):
-    if (user == None or user == ctx.message.author):
-      await ctx.send("**Why ban yourself when u can ban others??!!**")
-      return
-    if (reason == None):
-      reason = "**Fuck you!!!...Thats why!!**"
-    message = f"**You have been banned from {ctx.guild.name} for following reason: {reason}**"
-    await user.send(message)
-    await ctx.guild.ban(user, reason=reason)
-    await ctx.send(f"**<@{user}> has been banned for the following reason: {reason}**")
-  
-    
-@bot.command(name = 'timeout', help = 'The user is timed out from the server/(not working)')
-@commands.has_any_role('mod','Anudi Mod')
-async def timeout(ctx, user: discord.User = None, time:int = None):
-  if (user == None or user == ctx.message.author):
-    await ctx.send("**You timed out yourself, wait you can't dumbass!!**")
-    return
-  duration = datetime.timedelta(minutes=time)
-  user_id = user.id
-  await user.timeout_for(duration)
-  await ctx.send(f"**<@{user_id}> is successfully timed out for {time} minutes!!**")
-  
-  
-youtube_dl.utils.bug_reports_message = lambda: ''
+@bot.command(name='pfp', help="Shows the user's avatar")
+async def pfp(ctx, user: discord.User = None):
+    user = user or ctx.author
+    embed = discord.Embed(title=f"{user.name}'s Avatar")
+    embed.set_image(url=user.display_avatar.url)
+    await ctx.send(embed=embed)
 
-ytdl_format_options = {
+# Music Player
+
+yt_dl_opts = {
     'format': 'bestaudio/best',
-    'audioformat': 'mp3',
     'outtmpl': '%(title)s.mp3',
-    'preferredquality': '320',
-    'restrictfilenames': True,
     'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0' 
-    
 }
 
-ffmpeg_options = {
-    
-    'options': '-vn'
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+yt_dl = yt_dlp.YoutubeDL(yt_dl_opts)
+queue = []
+import yt_dlp
+import discord
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(self, source, *, data, volume=0.5):
-        super().__init__(source, volume)
+    YTDL_OPTIONS = {
+        'format': 'bestaudio/best',
+        'noplaylist': True,  # Prevents downloading entire playlists
+        'default_search': 'ytsearch',
+        'quiet': True,
+    }
 
+    FFMPEG_OPTIONS = {
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+        'options': '-vn'
+    }
+
+    def __init__(self, source, *, data):
+        super().__init__(source)
         self.data = data
-
-        self.title = data.get('title')
-        self.url = data.get('url')
+        self.title = data.get('title', 'Unknown Title')
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
+    async def from_url(cls, url: str, loop=None):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        
+        # Run yt-dlp asynchronously
+        with yt_dlp.YoutubeDL(cls.YTDL_OPTIONS) as ydl:
+            data = await loop.run_in_executor(None, lambda: ydl.extract_info(url, download=False))
 
+        # If it's a playlist or search result, extract the first entry
         if 'entries' in data:
             data = data['entries'][0]
-        global filename
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+        if 'url' not in data:
+            raise ValueError("No valid audio URL found.")
+
+        return cls(discord.FFmpegPCMAudio(data['url'], **cls.FFMPEG_OPTIONS), data=data)
 
 
-queue=[]
-
-@tasks.loop(seconds=5)
-async def not_playing(ctx):
-    voice_client = ctx.message.guild.voice_client
-    server = ctx.message.guild
-    voice_channel = server.voice_client
-    if voice_client and voice_client.is_playing():
-        pass
-    else:
-        if voice_client and voice_client.is_paused():
-            pass
-        else:
-            async with ctx.typing():
-                player_queue = await YTDLSource.from_url(queue[0], loop=client.loop)
-                voice_channel.play(player_queue, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send('**Now playing: {}**'.format(player_queue.title)+' **\nRequested By: **'+format(ctx.author.mention))
-            os.remove(player_queue.title)
-            del queue[0]
-
-
-@bot.command(name='join' ,help='This command will connect me')
+@bot.command(name='join', help='This command will connect me')
 async def join(ctx):
-    if not ctx.message.author.voice:
-        await ctx.send("{} is not connected to a voice channel".format(ctx.author.mention))
+    if ctx.author.voice:
+        await ctx.author.voice.channel.connect()
+    else:
+        await ctx.send("You are not in a voice channel!")
+
+
+# Create a queue to store song sources
+song_queue = {}
+
+@bot.command(name="play", help="Plays a song from YouTube")
+async def play(ctx, url: str):
+    voice_client = ctx.voice_client
+
+    # Ensure the bot joins the voice channel
+    if not voice_client:
+        await join(ctx)
+
+    # Convert search terms into "ytsearch:" queries
+    if not re.match(r"https?://", url):
+        url = f"ytsearch:{url}"
+
+    try:
+        player = await YTDLSource.from_url(url, loop=bot.loop)
+    except Exception as e:
+        await ctx.send(f"⚠️ Error: {str(e)}")
         return
+
+    # If the guild (server) does not have a queue, create one
+    if ctx.guild.id not in song_queue:
+        song_queue[ctx.guild.id] = []
+
+    # Add the song to the queue
+    song_queue[ctx.guild.id].append(player)
+
+    if ctx.voice_client.is_playing():
+        await ctx.send(f"Added **{player.title}** to the queue...")
+
+    # If nothing is currently playing, start playing
+    if not ctx.voice_client.is_playing():
+        await play_next(ctx)
+
+@bot.command(name="skip", help="Skips the current song")
+async def skip(ctx):
+    if ctx.voice_client.is_playing():
+        ctx.voice_client.stop()  # This will trigger `after` function in `play_next`
+        await ctx.send("⏭ Skipping the song...")
     else:
-        channel = ctx.message.author.voice.channel
-        
-    await channel.connect()
+        await ctx.send("❌ No song is currently playing!")
 
+async def play_next(ctx):
+    """Plays the next song in the queue."""
+    if song_queue[ctx.guild.id]:  # If there are songs in queue
+        player = song_queue[ctx.guild.id].pop(0)  # Get the next song
+        ctx.voice_client.play(player, after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop))
+        await ctx.send(f"**🎶 Now playing:** {player.title}")
+    else:
+        await ctx.send("✅ Queue is empty! Add more songs using `play <song>`.")
 
-@bot.command(name='play', help='This command plays music')
-async def play(ctx,url,*args):
-      voice_client = ctx.message.guild.voice_client
-      server = ctx.message.guild
-      voice_channel = server.voice_client
-      
+@bot.command(name="queue", help="Shows the current song queue")
+async def queue(ctx):
+    if ctx.guild.id in song_queue and song_queue[ctx.guild.id]:
+        queue_list = "\n".join(f"{i+1}. {song.title}" for i, song in enumerate(song_queue[ctx.guild.id]))
+        await ctx.send(f"🎵 **Current Queue:**\n{queue_list}")
+    else:
+        await ctx.send("🎵 The queue is empty! Add songs using `play <song>`.")
 
-      for word in args:
-        url += ' '
-        url += word
-      if voice_client and voice_client.is_playing():
-        queue.append(url)
-        print(queue)
-        await ctx.send('**Added:** {}'.format(url)+' **Requested By: **'+format(ctx.author.mention))
-        if not not_playing.is_running():
-          not_playing.start(ctx)
-      else:
-            async with ctx.typing():
-                player = await YTDLSource.from_url(url, loop=client.loop)
-                voice_channel.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send('**Now Spamming:** {}'.format(player.title)+'** \nRequested By: **'+format(ctx.author.mention))
-   
+@bot.command(name="clear", help="Clears the song queue")
+async def clear(ctx):
+    if ctx.guild.id in song_queue:
+        song_queue[ctx.guild.id] = []
+    await ctx.send("🗑 Queue cleared!")
 
-
-@bot.command(name='disconnect', help='This command stops the music and makes the bot leave the voice channel')
+@bot.command(name='disconnect', help='Disconnects the bot from VC')
 async def disconnect(ctx):
-    voice_client = ctx.message.guild.voice_client
-    await ctx.send('**Disconnected...Sayonara!!**')
-    queue.clear()
-    server = ctx.message.guild
-    voice_channel = server.voice_client
-    voice_channel.stop()
-    await voice_client.disconnect()
-    
-    
-  
-  
-    
-    
-
-@bot.command(name='stop', help='Stops the music')
-async def stop(ctx):
-    voice_client = ctx.message.guild.voice_client
-    await ctx.send('**Stopped**')
-    await voice_client.stop()
-
-@bot.command(name='queue', help='Displays the queue')
-async def queue_(ctx):
-    await ctx.send('**Queue: ** ```{\n}```'.format(queue))
-
-@bot.command(name='pause' , help='Pauses the music')
-async def pause(ctx):
-    voice_client = ctx.message.guild.voice_client
-    if voice_client and voice_client.is_playing():
-        voice_client.pause()
-        await ctx.send("**Paused**")
+    if ctx.voice_client:
+        await ctx.voice_client.disconnect()
+        await ctx.send('**Disconnected...Sayonara!!**')
     else:
-        await ctx.send("**I am not playing anything!!! why targeting me??!!**")
+        await ctx.send('I am not in a voice channel!')
+
+@bot.command(name='pause', help='Pauses the music')
+async def pause(ctx):
+    if ctx.voice_client and ctx.voice_client.is_playing():
+        ctx.voice_client.pause()
+        await ctx.send("**Paused**")
 
 @bot.command(name='resume', help='Resumes the music')
 async def resume(ctx):
-    voice_client = ctx.message.guild.voice_client
-    if voice_client and voice_client.is_paused():
-        voice_client.resume()
+    if ctx.voice_client and ctx.voice_client.is_paused():
+        ctx.voice_client.resume()
         await ctx.send("**Resumed**")
-    else:
-        await ctx.send("**It's playing...you deaf or what??**")
 
-@bot.command(name='skip' , help='Skips the song')
-async def skip(ctx):
-        server = ctx.message.guild
-        voice_channel = server.voice_client
-        voice_client = ctx.message.guild.voice_client
-        if voice_client and voice_client.is_playing():
-            voice_client.stop()
-            async with ctx.typing():
-                player_queue = await YTDLSource.from_url(queue[0], loop=client.loop)
-                voice_channel.play(player_queue, after=lambda e: print('Player error: %s' % e) if e else None)
-            await ctx.send("**Song Skipped**")
-            await ctx.send('**Now playing:** {}'.format(player_queue.title))
-            del queue[0]  
-  
+@bot.command(name='stop', help='Stops the music')
+async def stop(ctx):
+    if ctx.voice_client:
+        ctx.voice_client.stop()
+        await ctx.send("**Stopped**")
 
-load_dotenv()
-bot.run(os.getenv("TOKEN"))
+bot.run(TOKEN)
